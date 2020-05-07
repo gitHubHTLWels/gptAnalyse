@@ -8,6 +8,8 @@
 #define EFI_MAGIC_LEN 8
 #define EFI_ENTRIES 32 
 #define EFI_DISK_GUID_LEN 16
+
+
 /* basic types */
 typedef  unsigned char BYTE;
 typedef unsigned short   U_INT16;
