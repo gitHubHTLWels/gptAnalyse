@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+#include <assert.h>
+
 
 #include "gptAnalyse.h"
 #include "gptStruct.h"
@@ -41,20 +43,27 @@ static FILE *fp=NULL;
 
 
 	BOOL gpt_process()  {
+
 		PTABLE_GPT  gpt;
+		EFI_entry entr;
+
 		int haveRead=0;
+	  
+		assert(fp!=NULL);
+		memset(&entr,0,sizeof(EFI_entry));	
 	#ifdef DEBUG
-		 puts("\nDEBUG:: gpt_process\n");
+		 printf("\nDEBUG:: gpt_process, Length of GPT_TABLE: %d\n",GPT_TABLE_LEN);
 	#endif
 		 haveRead = fread(&gpt,GPT_TABLE_LEN,1,fp);
 		 if (haveRead != 1) {
-			printf("Error in reading file (wrong length), expected: %d, received: %d\n",GPT_TABLE_LEN,haveRead);
+			printf("Error in reading file (wrong length), expected: %d, received: %d\n",1,haveRead);
+			//printf("Errno: %d , %s\n",errno,strerror(errno));
 			return FALSE;
 		 }
 		 printf("GPT-Analyse \t\t Htl Wels/AHIT3\n\n");
 		 printf("Signatur: \t\t %s\n",gpt.header.magic);
 		 printf("Header Size: \t\t %ld / 0x%x\n",gpt.header.header_sz,gpt.header.header_sz);
-		 //printf("Header Location: \t %ld / 0x%x\n",gpt.header.header_sz,gpt.header.header_lba,gpt.header.header_lba);
+		 printf("First LBA: \t %ld / 0x%x\n",gpt.header.header_lba,gpt.header.header_lba);
 		 printf("Backup GPT: \t\t %ld / 0x%x\n",gpt.header.backup_lba,gpt.header.backup_lba);
 		 
 		 printf("Partitions: \t\t %d / 0x%x\n",gpt.header.entries_count,gpt.header.entries_count);

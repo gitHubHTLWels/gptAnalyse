@@ -22,12 +22,9 @@ int main(int argc, char **argv) {
 			  puts("GPT Header (*.iso) not found\n");
 			  return ERROR_READING_FILE;
 	}
-	
 	if (!gpt_open(*(argv +1))) {
 	     return -1;
 	}
-
-
 	if (!gpt_process()) {
 		  return -2;
 	}
