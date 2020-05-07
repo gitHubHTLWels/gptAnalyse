@@ -19,13 +19,14 @@ int main(int argc, char **argv) {
 		return ERROR_MISSING_ARG;
 	}
 	if (!file_exist( *(argv	+1))) {
-			  puts("GPT Header Info not found\n");
+			  puts("GPT Header (*.iso) not found\n");
 			  return ERROR_READING_FILE;
 	}
 	
 	if (!gpt_open(*(argv +1))) {
 	     return -1;
 	}
+
 
 	if (!gpt_process()) {
 		  return -2;
