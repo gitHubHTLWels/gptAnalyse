@@ -4,10 +4,16 @@
 #include <errno.h>
 #include <string.h>
 #include <assert.h>
-
+#include <wchar.h>
+#include <locale.h>
 
 #include "gptAnalyse.h"
 #include "gptStruct.h"
+
+
+/* ******* PROTOtypes ********* */
+static BOOL process_efiEntries(PTABLE_GPT *pGPT);
+static void show_efiEntry(EFI_entry *entry);
 
 
 static FILE *fp=NULL;
@@ -45,16 +51,16 @@ static FILE *fp=NULL;
 	BOOL gpt_process()  {
 
 		PTABLE_GPT  gpt;
-		EFI_entry entr;
 
 		int haveRead=0;
 	  
 		assert(fp!=NULL);
-		memset(&entr,0,sizeof(EFI_entry));	
+
 	#ifdef DEBUG
 		 printf("\nDEBUG:: gpt_process, Length of GPT_TABLE: %d\n",GPT_TABLE_LEN);
 	#endif
 		 haveRead = fread(&gpt,GPT_TABLE_LEN,1,fp);
+
 		 if (haveRead != 1) {
 			printf("Error in reading file (wrong length), expected: %d, received: %d\n",1,haveRead);
 			//printf("Errno: %d , %s\n",errno,strerror(errno));
@@ -68,8 +74,38 @@ static FILE *fp=NULL;
 		 
 		 printf("Partitions: \t\t %d / 0x%x\n",gpt.header.entries_count,gpt.header.entries_count);
 		 printf("Partition Size: \t %d / %x\n\n",gpt.header.entries_size,gpt.header.entries_size);
-		  
+		 process_efiEntries(&gpt);		  
 		 return TRUE;
 }	
 
+static BOOL process_efiEntries(PTABLE_GPT *pGPT) {
+
+	EFI_entry entry;
+	for (char jj=0;jj<EFI_ENTRIES_LBA; jj++) {
+		  entry = pGPT->efiEntries[jj];
+		  if (entry.type_uuid[0] == NULL) {
+				jj=EFI_ENTRIES_LBA+1	;
+		  }
+		  else
+				show_efiEntry(&entry);
+
+	}
+
+}
+
+
+
+
+static void show_efiEntry(EFI_entry *entry) {
+   printf("Partition type: \t");
+	for (char jj=0;jj<EFI_TYPE_LEN;jj++)
+			printf("%x",entry->type_uuid[jj]);
+   printf("\nPartition name: \t");
+	for (char jj=0;jj<EFI_NAME_LEN;jj++) {
+			printf("%x",entry->name[jj]);
+	}
+	printf("\nFirst LBA:      \t%.8x\n",entry->first_lba);
+	printf("Legacy BIOS bootable: \t%x\n",entry->attr & 0x04);
+
+}
 
